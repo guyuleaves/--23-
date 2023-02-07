@@ -1,0 +1,826 @@
+# -*- coding: utf-8 -*-
+
+#文件日期
+import datetime 
+date = datetime.datetime.now()
+date_2 = str(date.year) + str("%02d"%(date.month)) + str("%02d"%(date.day))
+
+import os
+import pandas as pd
+from tqdm import tqdm
+from openpyxl import load_workbook
+import warnings
+ 
+warnings.filterwarnings('ignore')
+
+path = r"C:\Users\Administrator\Desktop\湖北乡村建设评价材料\湖北评价8月\指标计算代码\指标计算代码"
+os.chdir(path)
+
+path2 = "村干部问卷"
+#wj_list = [i for i in os.listdir(path2) if "~" not in i]
+wj_list = ["湖北省村干部问卷（截至1031）_清洗结果20221229.xlsx"]
+data_all = pd.DataFrame()
+
+for wj in tqdm(wj_list):
+    data_df = pd.read_excel(os.path.join(path2,wj))
+    data_df = data_df.loc[ : ,~data_df.columns.str.contains("^Unnamed")]
+    data_df["省-市-县"]=data_df["1.省市县/区"]
+    col = list(data_df.columns)
+
+    data_prov = pd.DataFrame()
+    place = [i for i in col if i.find("省市") != -1][0]
+    #place= [i for i in col if i.find("市-县-镇") != -1][0]
+    crop = [i for i in col if i.find(".耕地面积") != -1][0]
+    crop_qg = [i for i in col if i.find("丢荒弃耕的耕地面积") != -1][0]
+    crop_lz = [i for i in col if i.find("已流转的耕地面积") != -1][0]
+    
+    pop_hj = [i for i in col if i.find(".户籍人口") != -1][0]
+    pop_cz = [i for i in col if i.find(".常住人口") != -1][0]
+    pop_hjhs=[i for i in col if i.find(".户籍户数") != -1][0]
+    pop_18 = [i for i in col if i.find("18岁以下的小孩数") != -1][0]
+    pop_60 = [i for i in col if i.find("60岁以上的老人数") != -1][0]
+    pop_wnldl = [i for i in col if i.find("全职务农的劳动力人数") != -1][0]
+    pop_ygyn = [i for i in col if i.find("亦工亦农的劳动力人数") != -1][0]
+    pop_xwldl = [i for i in col if i.find("县外务工的劳动力人数") != -1][0]
+    pop_wlrk = [i for i in col if i.find("外来流动人口") != -1][0]
+    pop_sndfx = [i for i in col if i.find("上年度返乡人口") != -1][0]
+    pop_dsxs = [i for i in col if i.find("通过电商销售产品的农户") != -1][0]
+
+    
+    building = [i for i in col if i.find("村内农房总数") != -1][0]
+    building_nopop = [i for i in col if i.find("无人居住的农房数") != -1][0]
+    building_xj = [i for i in col if i.find("新建的农房数") != -1][0]
+    building_area = [i for i in col if i.find("宅基地面积") != -1][0]
+    building_cs = [i for i in col if i.find("水冲式厕所的数量") != -1][0]
+    building_cf = [i for i in col if i.find("独立厨房的数量") != -1][0]
+    building_ys = [i for i in col if i.find("有可洗热水澡的独立浴室的数量") != -1][0]
+    building_yzb = [i for i in col if i.find("使用预制楼板建造的农房栋数") != -1][0]
+    building_lxsx = [i for i in col if i.find("履行了宅基地手续") != -1][0]
+    building_sjfa = [i for i in col if i.find("有设计方案") != -1][0]
+    building_fx = [i for i in col if i.find("村内翻新的农房数") != -1][0]
+    
+
+    
+    school_yey = [i for i in col if i.find("是否有幼儿园") != -1][0]
+    school_xx = [i for i in col if i.find("是否有小学") != -1][0]
+    gongfu_kdd = [i for i in col if i.find("是否有快递点") != -1][0]
+    gongfu_ylfw = [i for i in col if i.find("是否有养老服务设施") != -1][0]
+    gongfu_zwytj = [i for i in col if i.find("是否有政务一体机") != -1][0]
+    gongfu_cyzs = [i for i in col if i.find("有医护人员值守") != -1][0]
+    
+    sheshi_ld = [i for i in col if i.find("有没有路灯") != -1][0]
+    sheshi_rq = [i for i in col if i.find("通燃气管道") != -1][0]
+    sheshi_zls = [i for i in col if i.find("集中供水，水源为自来水厂的自然村个数") != -1][0]
+    sheshi_fzls = [i for i in col if i.find("集中供水，水源非自来水厂（如井水等）的自然村个数") != -1][0]
+    sheshi_wjzgs = [i for i in col if i.find("无集中供水的自然村个数") != -1][0]
+    sheshi_czws = [i for i in col if i.find("接入城镇污水处理管网的自然村个数") != -1][0]
+    sheshi_cjws = [i for i in col if i.find("村级独立污水处理设施的自然村个数") != -1][0]
+    sheshi_wswcl = [i for i in col if i.find("污水未进行处理的自然村个数") != -1][0]
+    sheshi_wsyz = [i for i in col if i.find("53-2题中，设施在有效运转的自然村个数") != -1][0]
+    sheshi_gc = [i for i in col if i.find("公厕有没有专人管护") != -1][0]
+    sheshi_gcbj = [i for i in col if i.find("有没有保洁人员") != -1][0]
+    sheshi_ljfl = [i for i in col if i.find("开展垃圾分类的自然村个数") != -1][0]
+    sheshi_shlj = [i for i in col if i.find("村内生活垃圾处理情况") != -1][0]
+    sheshi_jzlj = [i for i in col if i.find("建筑垃圾处理情况") != -1][0]
+    sheshi_ljzy = [i for i in col if i.find("垃圾转运走时有没有分类装好") != -1][0]
+    sheshi_nwj = [i for i in col if i.find("有没有专业的泥瓦匠") != -1][0]
+    sheshi_fmyq = [i for i in col if i.find("对村民建房的风貌是否有要求") != -1][0]
+    
+    jzjs = [i for i in col if i.find("有多少村民集资建设村庄") != -1][0]
+    tgtl = [i for i in col if i.find("村民义务投工投劳参与村庄建设") != -1][0]
+    nyss= [i for i in col if i.find("农业设施建设") != -1][0]
+    jcss= [i for i in col if i.find("村庄基础设施建设") != -1][0]
+    rjhj= [i for i in col if i.find("人居环境建设") != -1][0]
+    scrh= [i for i in col if i.find("三产融合相关设施建设") != -1][0]
+    ggfw= [i for i in col if i.find("公共服务设施建设") != -1][0]
+    qtxmtz = [i for i in col if i.find("去年村庄其他项目投资金额") != -1][0]
+
+    rural = [i for i in col if i.find("行政村") != -1][0]
+    rural2 = [i for i in col if i.find("自然村个数") != -1][0]
+    
+    ############ 选取地区 ############
+
+    county_list = list(set(data_df[place]))
+    
+    for county in county_list:
+        data = data_df[data_df[place]==county].reset_index().drop(['index','问卷编号'],axis=1)
+        #data = data.drop_duplicates(["2.镇/乡",rural],keep="first")   
+        if data.empty:
+            continue
+        dic = {"指标":[],"结果":[],"详情":[],"有效样本数":[]}
+        ### 一、基本情况
+        data2 = data[data[crop]>=0]
+
+        " 第二部数据筛选和清洗  "
+
+        #1.撂荒率：丢荒弃耕的耕地面积/耕地面积
+        data2_1 = data2[data2[crop_qg]>=0] # 弃地面积大于0，才计算撂荒率
+        dic['指标'] += ["撂荒率(%)"]
+        if len(data2_1):
+            dic['结果'] += [round(sum(data2_1[crop_qg])/sum(data2_1[crop]),4)*100]
+            dic['详情'] += ["弃耕农田数："+str(round(sum(data2_1[crop_qg]),2))+"亩，农田总数"+str(sum(data2_1[crop]))+"亩"]
+            dic['有效样本数'] += [len(data2_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #2.耕地流转率：已流转的耕地面积/耕地面积
+        data2_2 = data2[data2[crop_lz]>=0]  # 流转面积大于0，才计算流转率
+        dic['指标'] += ["耕地流转率(%)"]
+        if len(data2_2):
+            dic['结果'] += [round(sum(data2_2[crop_lz])/sum(data2_2[crop]),4)*100]
+            dic['详情'] += ["流转农田数："+str(round(sum(data2_2[crop_lz]),2))+"亩，农田总数"+str(sum(data2_2[crop]))+"亩"]
+            dic['有效样本数'] += [len(data2_2)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        #3.人均宅基地面积：宅基地面积/户籍人口数
+        data2_3 = data[(data[building_area]>0)&(data[pop_hj]>0)]
+        dic['指标'] += ["人均宅基地面积(平方米/人)"]
+        if len(data2_3):
+            dic['结果'] += [round(sum(data2_3[building_area])*667/sum(data2_3[pop_hj]),2)]
+            dic['详情'] += ["单位：平方米/人，宅基地总面积："+str(round(sum(data2_3[building_area]),2))+"亩，户籍人口总数"+str(int(sum(data2_3[pop_hj])))+"人"]
+            dic['有效样本数'] += [len(data2_3)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        ### 二、人口情况
+        #4.常住/户籍：常住人口数/户籍人口数
+        data3_1 = data[(data[pop_hj]>0)&(data[pop_cz]>0)]
+        dic['指标'] += ["常住户籍比"]
+        if len(data3_1):
+            dic['结果'] += [round(sum(data3_1[pop_cz])/sum(data3_1[pop_hj]),4)]
+            dic['详情'] += ["常住人口数："+str(int(sum(data3_1[pop_cz])))+"人，户籍人口数："+str(int(sum(data3_1[pop_hj])))+"人"]
+            dic['有效样本数'] += [len(data3_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #5.高度空心化比例：常住人口数/户籍人口数<0.3
+        data3_1 = data[(data[pop_hj]>0)&(data[pop_cz]>0)]
+        data3_1['常住/户籍'] = data[pop_cz]/data[pop_hj]
+        df3_1 = data3_1[data3_1['常住/户籍']<0.3]
+        dic['指标'] += ["村庄人口高度空心化比例(%)"]
+        if len(df3_1):
+            dic['结果'] += [round(len(df3_1)/len(data3_1),4)*100]
+            dic['详情'] += ["常住/户籍小于0.3的行政村数量："+str(int(len(df3_1)))+"个，总行政村数量："+str(int(len(data3_1)))+"个"]
+            dic['有效样本数'] += [len(data3_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #6-1.60岁以上人口占比：60岁以上常住人口数/常住人口数
+        data3_2 = data[(data[pop_60]>=0)&(data[pop_cz]>0)]
+        dic['指标'] += ["老年人口占比(%)"]
+        if len(data3_2):
+            dic['结果'] += [round(sum(data3_2[pop_60])/sum(data3_2[pop_cz]),4)*100]
+            dic['详情'] += ["60岁以上常住人口数"+str(int(sum(data3_2[pop_60])))+"人，常住人口数："+str(int(sum(data3_2[pop_cz])))+"人"]
+            dic['有效样本数'] += [len(data3_2)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #6-2.18岁以下人口占比：18岁以下常住人口数/常住人口数
+        data3_3 = data[(data[pop_18]>=0)&(data[pop_cz]>0)]
+        dic['指标'] += ["18岁以下人口占比(%)"]
+        if len(data3_3):
+            dic['结果'] += [round(sum(data3_3[pop_18])/sum(data3_3[pop_cz]),4)*100]
+            dic['详情'] += ["18岁以下人口数："+str(int(sum(data3_3[pop_18])))+"人，常住人口数："+str(int(sum(data3_3[pop_cz])))+"人"]
+            dic['有效样本数'] += [len(data3_3)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #5.劳动力人数占比：常住人口数 - 18岁以下的小孩数 - 65岁以上的老人数
+        data3_4 = data[(data[pop_cz]>0)&(data[pop_18]>=0)&(data[pop_60]>=0)]
+        data3_4 = data3_4[data3_4[pop_cz]>=(data3_4[pop_18]+data3_4[pop_60])] # 常住人口 要大于 （18岁一下人口数+ 65岁以上人口数）
+        dic['指标'] += ["劳动力占比(%)"]
+        if len(data3_4):
+            dic['结果'] += [round(((sum(data3_4[pop_cz])-sum(data3_4[pop_18])-sum(data3_4[pop_60]))/sum(data3_4[pop_cz])),4)*100]
+            dic['详情'] += ["劳动力人数："+str(int(sum(data3_4[pop_cz])-sum(data3_4[pop_18])-sum(data3_4[pop_60])))+"人，常住人口数："+str(int(sum(data3_4[pop_cz])))+"人"]
+            dic['有效样本数'] += [len(data3_4)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #6.全职务农占比：全职务农的劳动力人数/劳动力人数
+        data3_5 = data3_4[(data3_4[pop_wnldl]>=0)]
+        data3_5 = data3_5[(data3_5[pop_cz]-data3_5[pop_18]-data3_5[pop_60])>=data3_5[pop_wnldl]]  # 总劳动力人口数 要大于 务农劳动力数量
+        dic['指标'] += ["全职务农劳动力占比(%)"]
+        if len(data3_5):
+            dic['结果'] += [round(sum(data3_5[pop_wnldl])/(sum(data3_5[pop_cz])-sum(data3_5[pop_18])-sum(data3_5[pop_60])),4)*100]
+            dic['详情'] += ["全职务农劳动力人数："+str(int(sum(data3_5[pop_wnldl])))+"人，劳动力人数："+str(int(sum(data3_5[pop_cz])-sum(data3_5[pop_18])-sum(data3_5[pop_60])))+"人"]
+            dic['有效样本数'] += [len(data3_5)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]        
+        
+        #7.亦工亦农占比：亦工亦农的劳动力人数/劳动力人数
+        data3_6 = data3_4[(data3_4[pop_ygyn]>=0)]
+        data3_6 = data3_6[(data3_6[pop_cz]-data3_6[pop_18]-data3_6[pop_60])>=data3_6[pop_ygyn]] # 总劳动力人口数 要大于 亦工亦农劳动力数量
+        dic['指标'] += ["亦工亦农劳动力占比(%)"]
+        if(len(data3_6)):
+            dic['结果'] += [round(sum(data3_6[pop_ygyn])/(sum(data3_6[pop_cz])-sum(data3_6[pop_18])-sum(data3_6[pop_60])),4)*100]
+            dic['详情'] += ["亦工亦农劳动力人数："+str(int(sum(data3_6[pop_ygyn])))+"人，劳动力人数："+str(int(sum(data3_6[pop_cz])-sum(data3_6[pop_18])-sum(data3_6[pop_60])))+"人"]
+            dic['有效样本数'] += [len(data3_6)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]   
+                
+            
+        #8.县外务工占比：县外务工的劳动力人数/劳动力人数
+        data3_7 = data3_4[data3_4[pop_xwldl]>=0]
+        data3_7 = data3_7[(data3_7[pop_cz]-data3_7[pop_18]-data3_7[pop_60])>=data3_7[pop_xwldl]] # 总劳动力人口数 要大于 县外务工劳动力数量
+        dic['指标'] += ["县外务工劳动力占比(%)"]
+        if len(data3_7):
+
+            dic['结果'] += [round(sum(data3_7[pop_xwldl])/(sum(data3_7[pop_cz])-sum(data3_7[pop_18])-sum(data3_7[pop_60])),4)*100]
+            dic['详情'] += ["县外务工劳动力人数："+str(int(sum(data3_7[pop_xwldl])))+"人，劳动力人数（常住+县外务工）："+str(int(sum(data3_7[pop_cz])-sum(data3_7[pop_18])-sum(data3_7[pop_60])))+"人"]
+            dic['有效样本数'] += [len(data3_7)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #9.外来流动人口占比：外来流动人口/常住人口数
+        data3_8 = data[data[pop_cz]>0]
+        data3_8 = data3_8[data3_8[pop_wlrk]>=0]
+        data3_8 = data3_8[data3_8[pop_cz]>data3_8[pop_wlrk]]  # 常住人口要大于外流人口
+        dic['指标'] += ["外来人口占比(%)"]
+        if len(data3_8):
+            dic['结果'] += [round((sum(data3_8[pop_wlrk])/sum(data3_8[pop_cz])),4)*100]
+            dic['详情'] += ["外来人口数："+str(int(sum(data3_8[pop_wlrk])))+"人，常住人口数："+str(int(sum(data3_8[pop_cz])))+"人"]
+            dic['有效样本数'] += [len(data3_8)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #10.上年度返乡人口占比：上年度返乡人口/常住人口
+        data3_9 = data[data[pop_cz]>0]
+        data3_9 = data3_9[data3_9[pop_sndfx]>=0]
+        data3_9 = data3_9[data3_9[pop_cz]>data3_9[pop_sndfx]] # 常住人口要大于上年度人口
+        dic['指标'] += ["上年度返乡人口占比(%)"]
+        if len(data3_9):
+            dic['结果'] += [round((sum(data3_9[pop_sndfx])/sum(data3_9[pop_cz])),4)*100]
+            dic['详情'] += ["上年度返乡人口数："+str(int(sum(data3_9[pop_sndfx])))+"人，常住人口数："+str(int(sum(data3_9[pop_cz])))+"人"]
+            dic['有效样本数'] += [len(data3_9)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        #11.通过电商销售产品的农户占比
+        
+        data3_10 = data[data[pop_hjhs]>0]
+        data3_10 = data3_10[data3_10[pop_dsxs]>=0]
+        data3_10 = data3_10[data3_10[pop_hjhs]>data3_10[pop_dsxs]] # 户籍户数要大于电商销售农户
+        dic['指标'] += ["通过电商销售产品的农户占比(%)"]
+        if len(data3_10):
+            dic['结果'] += [round((sum(data3_10[pop_dsxs])/sum(data3_10[pop_hjhs])),4)*100]
+            dic['详情'] += ["通过电商销售产品的农户数："+str(int(sum(data3_10[pop_dsxs])))+"人，户籍户数："+str(int(sum(data3_10[pop_hjhs])))+"人"]
+            dic['有效样本数'] += [len(data3_10)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        ### 三、住房情况
+        data4 = data[data[building]>0]
+        #10.无人居住的农房占比：一年以上无人居住的农房数/村内农房总数
+        data4_1 = data4[data4[building_nopop]>=0]
+        dic['指标'] += ["无人居住农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_nopop])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["无人居住农房数："+str(int(sum(data4_1[building_nopop])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+            #print(county)
+        
+        #11.有独立厨房的农房占比：农房内有独立厨房的数量/村内农房总数
+        data4_2 = data4[data4[building_cf]>=0]
+        dic['指标'] += ["独立厨房占比(%)"]
+        if len( data4_2):
+            dic['结果'] += [round(sum(data4_2[building_cf])/sum(data4_2[building]),4)*100]
+            dic['详情'] += ["有独立厨房的农房数："+str(int(sum(data4_2[building_cf])))+"栋，农房总数"+str(int(sum(data4_2[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_2)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #12.有可洗热水澡的独立浴室的农房占比：农房内有可洗热水澡的独立浴室的数量/村内农房总数
+        data4_1 = data4[data4[building_ys]>=0]
+        dic['指标'] += ["独立浴室占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_ys])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["有可洗热水澡的独立浴室的农房数："+str(int(sum(data4_1[building_ys])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #13.有水冲式厕所的农房占比：农房内有水冲式厕所的数量/村内农房总数
+        data4_1 = data4[data4[building_cs]>=0]
+        dic['指标'] += ["水冲厕所占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_cs])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["有水冲式厕所的农房数："+str(int(sum(data4_1[building_cs])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #14.使用预制楼板建造的农房占比：使用预制楼板建造的农房栋数/村内农房总数
+        data4_1 = data4[data4[building_yzb]>=0]
+        dic['指标'] += ["使用预制楼板建造的农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_yzb])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["使用预制楼板建造的农房数："+str(int(sum(data4_1[building_yzb])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #15.新建农房占比：去年村内新建的农房数/村内农房总数
+        data4_1 = data4[data4[building_xj]>=0]
+        dic['指标'] += ["新建农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_xj])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["新建农房数："+str(int(sum(data4_1[building_xj])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        #16.翻新农房占比：去年村内翻新的农房数/村内农房总数
+        data4_1 = data4[data4[building_fx]>=0]
+        dic['指标'] += ["翻新农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round(sum(data4_1[building_fx])/sum(data4_1[building]),4)*100]
+            dic['详情'] += ["翻新农房数："+str(int(sum(data4_1[building_fx])))+"栋，农房总数"+str(int(sum(data4_1[building])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+        
+        #17.有设计方案农房占比：有设计方案/去年村内新建的农房数
+        data4_2 = data[data[building_xj]>0]
+        data4_1 = data4_2[data4_2[building_sjfa]>0]
+        data4_1 = data4_1[data4_1[building_xj]>=data4_1[building_sjfa]]  # 新建农房总数 要大于 有设计方案的农房数
+        
+        dic['指标'] += ["有设计方案的去年新建农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round((sum(data4_1[building_sjfa])/sum(data4_1[building_xj])),4)*100]
+            dic['详情'] += ["有设计方案的新建农房数："+str(int(sum(data4_1[building_sjfa])))+"栋，新建农房数："+str(int(sum(data4_1[building_xj])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        #18.农房建设的进行审批管理的行政村占比：农房建设的进行审批管理的样本数/有效样本数
+        data4_1 = data[data[building_xj]>0]
+        data4_1 = data4_1[data4_1[building_lxsx]>0]
+        data4_1 = data4_1[data4_1[building_xj]>=data4_1[building_lxsx]] # 新建农房总数 要大于 有审批的农房数
+        
+        dic['指标'] += ["履行审批手续的去年新建农房占比(%)"]
+        if len(data4_1):
+            dic['结果'] += [round((len(data4_1[building_lxsx])/len(data4_1[building_xj])),4)*100]
+            dic['详情'] += ["农房建设的进行审批管理的样本数："+str(int(len(data4_1[building_lxsx])))+"栋，有效样本数:"+str(int(len(data4_1[building_xj])))+"栋"]
+            dic['有效样本数'] += [len(data4_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+            
+        ### 四、公服情况
+        #17.幼儿园覆盖率：有幼儿园的行政村/有效样本总数
+        data5_1 = data[data[school_yey]=="是"]
+        dic['指标'] += ["幼儿园覆盖率(%)"]
+        
+        if len(data5_1):
+            dic['结果'] += [round(len(data5_1)/len(data),4)*100]
+            dic['详情'] += ["有幼儿园的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+            dic['有效样本数'] += [len(data5_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+        
+        #18.小学覆盖率：有小学的行政村/有效样本总数
+        data5_1 = data[data[school_xx]!="都没有"]
+        dic['指标'] += ["小学覆盖率(%)"]
+        dic['结果'] += [round(len(data5_1)/len(data),4)*100]
+        dic['详情'] += ["有小学教学点的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data5_1)]
+        
+        #19.快递点覆盖率：有快递点的行政村/有效样本总数
+        data5_1 = data[data[gongfu_kdd]=="是"]
+        dic['指标'] += ["快递点覆盖率(%)"]
+    
+        dic['结果'] += [round(len(data5_1)/len(data),4)*100]
+        dic['详情'] += ["有快递点的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data5_1)]
+        
+        #20.养老服务设施覆盖率：有养老服务设施的行政村/有效样本总数
+        data5_1 = data[data[gongfu_ylfw]=="是"]
+        dic['指标'] += ["养老服务设施覆盖率(%)"]
+        
+        dic['结果'] += [round((len(data5_1)/len(data)),4)*100]
+        dic['详情'] += ["有养老服务设施的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data5_1)]
+        
+        #21.政务一体机覆盖率：有政务一体机的行政村/有效样本总数
+        data5_1 = data[data[gongfu_zwytj]=="是"]
+        dic['指标'] += ["政务一体机覆盖率(%)"]
+        
+        dic['结果'] += [round((len(data5_1)/len(data)),4)*100]
+        dic['详情'] += ["有政务一体机覆盖的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data5_1)]
+        
+        #22.村医值守比率：村卫生室经常有医护人员值守/有效样本总数
+        data5_1 = data[data[gongfu_cyzs]=="是"]
+        dic['指标'] += ["经常有村医值守的行政村占比(%)"]
+        dic['结果'] += [round((len(data5_1)/len(data)),4)*100]
+        dic['详情'] += ["经常有村医值守的行政村数量："+str(len(data5_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data5_1)]
+        
+        ### 五、人居环境
+        
+        #23.路灯覆盖率：村内主要道路有没有路灯的行政村/有效样本总数
+        data6_1 = data[(data[sheshi_ld]=="有，村内所有主要道路都有")|(data[sheshi_ld]=="部分有，村内一部分主要道路有")]
+        dic['指标'] += ["有路灯的行政村占比(%)"]
+        dic['结果'] += [round((len(data6_1)/len(data)),4)*100]
+        dic['详情'] += ["有路灯的行政村数量："+str(len(data6_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data6_1)]
+        
+        #24.燃气管道覆盖率：村内通燃气管道覆盖率的行政村/有效样本总数
+        data6_1 = data[(data[sheshi_rq]=="有，全部自然村都通了")|(data[sheshi_rq]=="部分有，仅部分自然村通了燃气管道")]
+        dic['指标'] += ["有燃气管道覆盖的行政村占比(%)"]
+        
+        dic['结果'] += [round((len(data6_1)/len(data)),4)*100]
+        dic['详情'] += ["有燃气管道覆盖的行政村数量："+str(len(data6_1))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data6_1)]
+        
+        #25.集中供水的自然村占比：集中供水的自然村数量/有效样本的自然村总数
+        dic['指标'] += ["集中供水的自然村占比(%)"]
+        data6=data[data[rural2]>0] # 自然村个数大于0
+
+        data6_1 = data6[((data6[sheshi_zls]>0) | (data6[sheshi_fzls]>0))&
+        (data6[rural2]>=data6[sheshi_wjzgs]+data6[sheshi_zls])&(data6[rural2]>=data6[sheshi_wjzgs]+data6[sheshi_fzls])] # 避免太严格，而筛除太多数样本
+        if len(data6_1):
+            dic['结果'] += [round(((sum(data6_1[rural2])-sum(data6_1[sheshi_wjzgs]))/(sum(data6_1[rural2]))),4)*100]
+            dic['详情'] += ["集中供水的自然村数量："+str(int((sum(data6_1[rural2])-sum(data6_1[sheshi_wjzgs]))))+"个，自然村总数"+str(int(sum(data6_1[rural2])))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+                
+        
+        #26.自来水厂集中供水的自然村占比：集中供水且水源为自来水厂的自然村数量/有效样本的自然村总数
+        dic['指标'] += ["集中供水（自来水）的自然村占比(%)"]
+        
+        #data6_1 = data6[data6[sheshi_zls]>=0]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[sheshi_zls])/sum(data6_1[rural2]),4)*100]
+            dic['详情'] += ["集中供水（自来水）的自然村数量："+str(int(sum(data6_1[sheshi_zls])))+"个，自然村总数"+str(int(sum(data6_1[rural2])))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+                #print(county)
+        
+        #27.接入城镇污水处理管网的自然村占比：接入城镇污水处理管网的自然村数量/有效样本的自然村总数
+        dic['指标'] += ["接入城镇污水管网的自然村占比(%)"]
+        
+        data6_1 = data6[data6[sheshi_czws]>=0]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[sheshi_czws])/sum(data6_1[rural2]),4)*100]
+            dic['详情'] += ["接入城镇污水管网的自然村数量："+str(int(sum(data6_1[sheshi_czws])))+"个，自然村总数："+str(int(sum(data6_1[rural2])))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+                #print(county)
+        
+        #28.有村级独立污水处理设施的自然村占比：有村级独立污水处理设施的自然村数量/有效样本的自然村总数
+        dic['指标'] += ["有村级独立污水处理设施的自然村占比(%)"]
+        
+        data6_1 = data6[data6[sheshi_cjws]>=0]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[sheshi_cjws])/sum(data6_1[rural2]),4)*100]
+            dic['详情'] += ["有村级独立污水处理设施的自然村数量："+str(int(sum(data6_1[sheshi_cjws])))+"个，自然村总数："+str(int(sum(data6_1[rural2])))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+                #print(county)
+                
+
+        #29.对污水进行处理的自然村占比：1-无污水处理设施的自然村数量/有效样本的自然村总数    
+        dic["指标"]+=["对污水进行处理的自然村占比(%)"]
+        data6_1=data6[data6[sheshi_wswcl]>0]
+        if len(data6_1):
+            dic['结果'] += [(1-round(sum(data6_1[sheshi_wswcl])/sum(data6_1[rural2]),4))*100]
+            dic['详情'] += ["无污水处理设施的自然村个数："+str(int(sum(data6_1[sheshi_wswcl])))+"个，自然村总数："+str(int(sum(data6_1[rural2])))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['数据异常，均为空值！！！']
+            dic['有效样本数'] += [0]
+
+        #30.有污水处理设施的行政村占比：有污水处理设施的行政村数量/有效样本数
+        #改一下：未进行处理==0
+        data6_1 = data[(data[sheshi_czws]>0)|(data[sheshi_cjws]>0)]
+        dic['指标'] += ["对污水进行处理的行政村占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [(round(len(data6_1)/len(data),4))*100]
+            dic['详情'] += ["有污水处理设施的行政村数量："+str(len(data6_1))+"个，行政村数量："+str(len(data))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+        
+        #31.污水处理设施运行率：在运行的污水处理设施数/污水处理设施的样本数
+        data6_1 = data[(data[sheshi_wsyz]>0)&(data[sheshi_cjws]>0)]
+        data6_2 = data[data[sheshi_cjws]>0]
+        
+        dic['指标'] += ["污水处理设施在运行的自然村占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[sheshi_wsyz])/sum(data6_2[sheshi_cjws]),4)*100]
+            dic['详情'] += ["污水处理设施在运行的自然村数量："+str(sum(data6_1[sheshi_wsyz]))+"个，有污水处理设施的自然村数量："+str(sum(data6_2[sheshi_cjws]))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+        
+        #32.公厕有专人管护的行政村占比：公厕有专人管护的样本/有效样本数
+        data6_5 = data[data[sheshi_gc]=="有"]
+        dic['指标'] += ["公厕有专人管护的行政村占比(%)"]
+        dic['结果'] += [round(len(data6_5)/len(data),4)*100]
+        dic['详情'] += ["公厕有专人管护的行政村数量："+str(len(data6_5))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data)]
+        
+        #33.有保洁人员的行政村占比：村内有保洁人员的样本/有效样本数
+        data6_6 = data[data[sheshi_gcbj]=="有"]
+        dic['指标'] += ["有保洁人员的行政村占比(%)"]
+        dic['结果'] += [round(len(data6_6)/len(data),4)*100]
+        dic['详情'] += ["有保洁人员的行政村数量："+str(len(data6_6))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data)]
+        
+        #34.实行垃圾分类的行政村占比：实行垃圾分类的样本数/有效样本数
+        data6_7 = data[data[sheshi_ljfl]>0]
+        dic['指标'] += ["实行垃圾分类的行政村占比(%)"]
+        
+        dic['结果'] += [round(len(data6_7)/len(data),4)*100]
+        dic['详情'] += ["实行垃圾分类的行政村数量："+str(len(data6_7))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data)]
+        
+        #35.有专业的泥瓦匠的行政村占比：有专业的泥瓦匠的样本/有效样本数
+        data6_8 = data[data[sheshi_nwj]=="有"]
+        dic['指标'] += ["有专业的泥瓦匠的行政村占比(%)"]
+        dic['结果'] += [round(len(data6_8)/len(data),4)*100]
+        dic['详情'] += ["有专业的泥瓦匠的行政村数量："+str(len(data6_8))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data)]
+        
+        
+        #37.对村民建房的风貌有要求的行政村占比：村民建房的风貌有要求的样本/有效样本数
+        data6_10 = data[data[sheshi_fmyq]=="有"]
+        dic['指标'] += ["对村民建房的风貌有要求的行政村占比(%)"]
+        dic['结果'] += [round(len(data6_10)/len(data),4)*100]
+        dic['详情'] += ["对村民建房的风貌有要求的行政村数量："+str(len(data6_10))+"个，行政村数量："+str(len(data))+"个"]
+        dic['有效样本数'] += [len(data)]
+        
+        #38.上一年度行政村村民投工投劳平均人次
+        data6_1 = data[data[tgtl]>=0]
+        dic['指标'] += ["上一年度行政村村民投工投劳平均人次（人）"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[tgtl])/len(data6_1),2)]
+            dic['详情'] += ["上一年度行政村村民投工投劳人次："+str(sum(data6_1[tgtl]))+"次，行政村数量："+str(len(data6_1))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+        
+        #39.上一年度行政村村民集资建设村庄平均人次
+        data6_1 = data[data[jzjs]>=0]
+        dic['指标'] += ["上一年度行政村村民集资建设村庄平均人次（人）"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[jzjs])/len(data6_1),2)]
+            dic['详情'] += ["上一年度村民集资建设村庄人次："+str(sum(data6_1[jzjs]))+"次，行政村数量："+str(len(data6_1))+"个"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+        
+        
+        #村庄实施的建设项目类型及投资情况
+        data[nyss].fillna(0, inplace=True) 
+        data[jcss].fillna(0, inplace=True)
+        data[rjhj].fillna(0, inplace=True)
+        data[scrh].fillna(0, inplace=True)
+        data[ggfw].fillna(0, inplace=True)
+        
+        data["村庄建设项目投资总和"]=data[nyss]+data[jcss]+data[rjhj]+data[scrh]+data[ggfw]
+        data6_1 = data[data[nyss]>=0]
+        dic['指标'] += ["农业设施建设投资占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[nyss])/sum(data6_1["村庄建设项目投资总和"]),4)*100]
+            dic['详情'] += ["农业设施建设投资金额："+str(sum(data6_1[nyss]))+"元，总投资金额："+str(sum(data6_1["村庄建设项目投资总和"]))+"元"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+
+        data6_1 = data[data[jcss]>=0]
+        dic['指标'] += ["村庄基础设施建设投资占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[jcss])/sum(data6_1["村庄建设项目投资总和"]),4)*100]
+            dic['详情'] += ["村庄基础设施建设投资金额："+str(sum(data6_1[jcss]))+"元，总投资金额："+str(sum(data6_1["村庄建设项目投资总和"]))+"元"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+
+        data6_1 = data[data[rjhj]>=0]
+        dic['指标'] += ["人居环境建设投资占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[rjhj])/sum(data6_1["村庄建设项目投资总和"]),4)*100]
+            dic['详情'] += ["人居环境建设投资金额："+str(sum(data6_1[rjhj]))+"元，总投资金额："+str(sum(data6_1["村庄建设项目投资总和"]))+"元"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+
+        data6_1 = data[data[scrh]>=0]
+        dic['指标'] += ["三产融合相关设施建设投资占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[scrh])/sum(data6_1["村庄建设项目投资总和"]),4)*100]
+            dic['详情'] += ["三产融合相关设施建设投资金额："+str(sum(data6_1[scrh]))+"元，总投资金额："+str(sum(data6_1["村庄建设项目投资总和"]))+"元"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+
+        data6_1 = data[data[ggfw]>=0]
+        dic['指标'] += ["公共服务设施建设投资占比(%)"]
+        if len(data6_1):
+            dic['结果'] += [round(sum(data6_1[ggfw])/sum(data6_1["村庄建设项目投资总和"]),4)*100]
+            dic['详情'] += ["公共服务设施建设投资金额："+str(sum(data6_1[ggfw]))+"元，总投资金额："+str(sum(data6_1["村庄建设项目投资总和"]))+"元"]
+            dic['有效样本数'] += [len(data6_1)]
+        else:
+            dic['结果'] += ['']
+            dic['详情'] += ['有效问卷数为0！']
+            dic['有效样本数'] += [0]
+
+        
+        ######
+        data_dic = pd.DataFrame(dic)
+        county = county.replace("新疆生产建设兵团","兵团")
+        data_dic['省-县'] = county.split("-")[0][:2].replace("黑龙","黑龙江").replace("内蒙","内蒙古").replace("兵团","新疆兵团") + "-" + county.split("-")[2]
+        data_prov = data_prov.append(data_dic)
+        data_prov['type'] = "县"
+        data_prov2 = data_prov.reset_index().drop("index",axis=1)
+        
+        data_prov2 = data_prov2[data_prov2['结果']!=""]
+        data_prov2['结果'] = data_prov2['结果'].astype(float)
+        data_prov3 = data_prov2.groupby('指标')['结果'].mean().reset_index()
+        data_prov3['结果'] = [round(i,4)for i in data_prov3['结果']]
+        data_prov3['详情'] = ""
+        data_prov3['省-县'] = county.split("-")[0][:2].replace("黑龙","黑龙江").replace("内蒙","内蒙古").replace("兵团","新疆兵团") + "平均"
+        data_prov3['type'] = "省"
+    data_all = data_all.append(data_prov)
+    data_all = data_all.append(data_prov3)
+
+######
+# wj2 = pd.read_excel("村干部问卷合并-重编号0927_1008.xlsx")
+# prov = list(set([i.split("-")[0] for i in wj2['1.省市县/区']]))
+
+# dic2 = {'省份':[],'村庄人口高度空心化比例':[],'有效样本数':[]}
+# for p in prov:
+#     df_p = wj2[wj2['1.省市县/区'].str.startswith(p)]
+#     df_p2 = df_p[(df_p[pop_hj]>0)&(df_p[pop_cz]>0)]
+#     df_p2['常住/户籍'] = df_p2[pop_cz]/df_p2[pop_hj]
+#     df_p3 = df_p2[df_p2['常住/户籍']<0.3]
+#     dic2['省份'] += [p]
+#     dic2['村庄人口高度空心化比例'] += [round(len(df_p3)/len(df_p2),4)]
+#     dic2['有效样本数'] += [len(df_p2)]
+
+# dic2['省份'] += ['全国平均']
+# import numpy as np
+# all_value = np.mean(dic2['村庄人口高度空心化比例'])
+# dic2['村庄人口高度空心化比例'] += [round(all_value,4)]
+# dic2['有效样本数'] += [""]
+
+# wj3 = wj2[(wj2[pop_hj]>0)&(wj2[pop_cz]>0)]
+# wj3['常住/户籍'] = wj3[pop_cz]/wj3[pop_hj]
+# wj4 = wj3[wj3['常住/户籍']<0.3]
+# dic2['省份'] += ['全国平均-全样本']
+# dic2['村庄人口高度空心化比例'] += [round(len(wj4)/len(wj3),4)]
+# dic2['有效样本数'] += [len(wj3)]
+
+# df_dic2 = pd.DataFrame(dic2)
+# df_dic2.to_excel("村庄人口高度空心化比例"+date_2+".xlsx",index=0)
+
+######
+
+data_china = data_all[data_all['详情']!=""]
+data_china = data_china[data_china['结果']!=""]
+data_china['结果'] = data_china['结果'].astype(float)
+data_china2 = data_china.groupby('指标')['结果'].mean().reset_index()
+data_china2['结果'] = [round(i,4)for i in data_china2['结果']]
+data_china2['详情'] = ""
+data_china2['省-县'] = "全国平均"
+data_china2['type'] = "国"
+
+data_all = data_all.append(data_china2)
+    
+data_all2 = data_all.pivot(index="省-县",values="结果",columns="指标").reset_index()
+data_all2_1 = data_all2[data_all2['省-县'] == "全国平均"]
+data_all2_2 = data_all2[data_all2['省-县'] != "全国平均"]
+data_all2 = data_all2_1.append(data_all2_2)
+data_all2['type'] = ""
+data_all2.loc[data_all2['省-县'].str.contains("平均"),'type'] = "省"
+data_all2.loc[data_all2['省-县'] == "全国平均",'type'] = "国"
+data_all2.loc[data_all2['type'] == "",'type'] = "县"
+
+
+
+data_all3 = data_all.pivot(index="省-县",values="详情",columns="指标").reset_index()
+data_all3_1 = data_all3[data_all3['省-县'] == "全国平均"]
+data_all3_2 = data_all3[data_all3['省-县'] != "全国平均"]
+data_all3 = data_all3_1.append(data_all3_2)
+
+list_cols = list(data_dic['指标'])
+data_all_cols = ['省-县']
+data_all_cols += list_cols
+
+data_all3 = data_all3[data_all_cols]
+data_all_cols += ['type']
+data_all2 = data_all2[data_all_cols]
+
+data_all4 = data_all[data_all['type']=="县"].drop(['详情','type'],axis=1)
+zhibiao = ["上一年度行政村村民投工投劳平均人次（人）","污水处理设施在运行的自然村占比(%)","公厕有专人管护的行政村占比(%)"]
+
+data_all5 = data_all4[data_all4['指标'].isin(zhibiao)]
+
+with pd.ExcelWriter("村干部问卷_指标计算结果"+date_2+".xlsx") as writer:
+    data_all2.to_excel(writer,sheet_name="问卷结果",index=0)
+    data_all3.to_excel(writer,sheet_name="详情",index=0)
+    data_all4.to_excel(writer,sheet_name="样本数",index=0)
+    data_all5.to_excel(writer,sheet_name="评价指标",index=0)
+    
+prov_index = list(set([i.split("-")[0].replace("平均","") for i in data_all2['省-县']]))
+
+for prov in tqdm(prov_index):
+    if prov != "全国":
+        df = data_all2[(data_all2['省-县'].str.contains(prov))|(data_all2['type']=="国")]
+        df.index = df['省-县']
+        df = df.drop(['省-县'],axis=1).T
+        a = list(df.columns)
+        a.remove("全国平均")
+        a += ["全国平均"]
+        df = df[a]
+        df = df[df['全国平均']!='国']
+        
+        df = df.reindex(list_cols)
+
+        book = load_workbook("村干部问卷_指标计算结果"+date_2+".xlsx")
+        writer = pd.ExcelWriter("村干部问卷_指标计算结果"+date_2+".xlsx",engine='openpyxl')
+        writer.book = book
+        df.to_excel(writer,prov)
+        writer.save()
+
+writer.close()
