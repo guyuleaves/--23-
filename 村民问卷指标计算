@@ -1,0 +1,226 @@
+# -*- coding: utf-8 -*-
+
+# 文件日期
+import datetime
+
+date = datetime.datetime.now()
+date_2 = str(date.year) + str("%02d" % (date.month)) + str("%02d" % (date.day))
+
+import os
+import pandas as pd
+from tqdm import tqdm
+from openpyxl import load_workbook
+import warnings
+
+warnings.filterwarnings('ignore')
+
+path = r"C:\Users\Administrator\Desktop\湖北乡村建设评价材料\湖北评价8月\指标计算代码\指标计算代码"
+os.chdir(path)
+
+path2 = "村民问卷"
+# wj_list = [i for i in os.listdir(path2) if ("~" not in i)&("处理" in i)]
+wj_list = ["湖北省村民问卷（截至1031）_清洗结果20221229.xlsx"]
+data_all = pd.DataFrame()
+
+for wj in tqdm(wj_list):
+    data_df = pd.read_excel(os.path.join(path2, wj))
+    data_df = data_df.loc[:, ~data_df.columns.str.contains("^Unnamed")]
+    data_df["省-市-县"] = data_df["0-1.省市区/县"]
+    col = list(data_df.columns)
+
+    data_prov = pd.DataFrame()
+    place = [i for i in col if i.find("省市") != -1][0]
+    jthd = [i for i in col if i.find("参与村里组织的村民集体活动") != -1][0]
+    scscs = [i for i in col if i.find("自建房内是否有以下设施") != -1][0]
+    dlcf = scscs
+    rsly = scscs
+    gsrf = scscs
+    syrq1 = [i for i in col if i.find("最常使用的生活燃料") != -1][0]
+    syrq2 = [i for i in col if i.find("除此之外还使用什么燃料") != -1][0]
+    dlyh = [i for i in col if i.find("道路是否基本实现硬底化") != -1][0]
+
+    county_list = list(set(data_df[place]))
+
+    for county in county_list:
+        data = data_df[data_df[place] == county].reset_index().drop(['index', '问卷编号'], axis=1)
+        if data.empty:
+            continue
+        dic = {"指标": [], "结果": [], "详情": [], "有效样本数": []}
+        # 指标16 村民参与村集体活动的积极性
+        data1 = data[data[jthd] == "经常参加"]
+
+        dic['指标'] += ["指标16 村民参与村集体活动的积极性(%)"]
+        if len(data1):
+            dic['结果'] += [round(len(data1[jthd]) / len(data[jthd]), 4) * 100]
+            dic['详情'] += ["经常参加的总人数：" + str(len(data1[jthd])) + "人，问卷总数" + str(len(data[jthd])) + "张"]
+            dic['有效样本数'] += [len(data1[jthd])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标24 有水冲式卫生厕所的农房占比（%）
+        data2 = data[data[scscs].str.contains('有冲水设施的卫生厕所', na=False)]
+
+        dic['指标'] += ["指标24 有水冲式卫生厕所的农房占比(%)"]
+        if len(data2):
+            dic['结果'] += [round(len(data2[scscs]) / len(data[scscs]), 4) * 100]
+            dic['详情'] += [
+                "有水冲式厕所的总人数：" + str(len(data2[scscs])) + "人，问卷总数" + str(len(data[scscs])) + "张"]
+            dic['有效样本数'] += [len(data2[scscs])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标25 有独立厨房的农房占比（%）
+        data3 = data[data[dlcf].str.contains('独立厨房（只用作厨房的房间）', na=False)]
+
+        dic['指标'] += ["指标25 有独立厨房的农房占比（%）"]
+        if len(data3):
+            dic['结果'] += [round(len(data3[dlcf]) / len(data[dlcf]), 4) * 100]
+            dic['详情'] += ["有独立厨房的总人数：" + str(len(data3[dlcf])) + "人，问卷总数" + str(len(data[dlcf])) + "张"]
+            dic['有效样本数'] += [len(data3[dlcf])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标26 日常可热水淋浴的农房占比（%）
+        data4 = data[data[rsly].str.contains('浴室（能够使用热水淋浴的房间）', na=False)]
+
+        dic['指标'] += ["指标26 日常可热水淋浴的农房占比（%）"]
+        if len(data4):
+            dic['结果'] += [round(len(data4[rsly]) / len(data[rsly]), 4) * 100]
+            dic['详情'] += [
+                "日常可热水淋浴的总人数：" + str(len(data4[rsly])) + "人，问卷总数" + str(len(data[rsly])) + "张"]
+            dic['有效样本数'] += [len(data4[rsly])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标27 农村集中供水入房率（%）
+        data5 = data[data[gsrf].str.contains('自来水', na=False)]
+
+        dic['指标'] += ["指标27 农村集中供水入房率（%）"]
+        if len(data5):
+            dic['结果'] += [round(len(data5[gsrf]) / len(data[gsrf]), 4) * 100]
+            dic['详情'] += ["使用自来水的总人数：" + str(len(data5[gsrf])) + "人，问卷总数" + str(len(data[gsrf])) + "张"]
+            dic['有效样本数'] += [len(data5[gsrf])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标29 使用燃气的农户占比（%）
+        data["使用燃气的农户占"] = data[syrq1] + ";" + data[syrq2]
+        data6 = data[
+            (data["使用燃气的农户占"].str.contains('天然气')) | (data["使用燃气的农户占"].str.contains('罐装液化气'))]
+
+        dic['指标'] += ["指标29 使用燃气的农户占比（%）"]
+        if len(data6):
+            dic['结果'] += [round(len(data6["使用燃气的农户占"]) / len(data["使用燃气的农户占"]), 4) * 100]
+            dic['详情'] += ["使用燃气的农户总人数：" + str(len(data6["使用燃气的农户占"])) + "户，问卷总数" + str(
+                len(data["使用燃气的农户占"])) + "张"]
+            dic['有效样本数'] += [len(data6["使用燃气的农户占"])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        # 指标42 村内通户道路硬化占比（%）
+        data7 = data[data[dlyh] == "是"]
+
+        dic['指标'] += ["指标42 村内通户道路硬化占比（%）"]
+        if len(data5):
+            dic['结果'] += [round(len(data7[dlyh]) / len(data[dlyh]), 4) * 100]
+            dic['详情'] += ["道路实现硬底化户数：" + str(len(data7[dlyh])) + "户，问卷总数" + str(len(data[dlyh])) + "张"]
+            dic['有效样本数'] += [len(data7[dlyh])]
+        else:
+            dic['结果'] += [""]
+            dic['详情'] += ["有效问卷数为0！"]
+            dic['有效样本数'] += [0]
+
+        data_dic = pd.DataFrame(dic)
+        county = county.replace("新疆生产建设兵团", "兵团")
+        data_dic['省-县'] = county.split("-")[0][:2].replace("黑龙", "黑龙江").replace("内蒙", "内蒙古").replace("兵团",
+                                                                                                                 "新疆兵团") + "-" + \
+                            county.split("-")[2]
+        data_prov = data_prov.append(data_dic)
+        data_prov['type'] = "县"
+        data_prov2 = data_prov.reset_index().drop("index", axis=1)
+
+        data_prov2 = data_prov2[data_prov2['结果'] != ""]
+        data_prov2['结果'] = data_prov2['结果'].astype(float)
+        data_prov3 = data_prov2.groupby('指标')['结果'].mean().reset_index()
+        data_prov3['结果'] = [round(i, 4) for i in data_prov3['结果']]
+        data_prov3['详情'] = ""
+        data_prov3['省-县'] = county.split("-")[0][:2].replace("黑龙", "黑龙江").replace("内蒙", "内蒙古").replace(
+            "兵团", "新疆兵团") + "平均"
+        data_prov3['type'] = "省"
+    data_all = data_all.append(data_prov)
+    data_all = data_all.append(data_prov3)
+
+data_china = data_all[data_all['详情'] != ""]
+data_china = data_china[data_china['结果'] != ""]
+data_china['结果'] = data_china['结果'].astype(float)
+data_china2 = data_china.groupby('指标')['结果'].mean().reset_index()
+data_china2['结果'] = [round(i, 4) for i in data_china2['结果']]
+data_china2['详情'] = ""
+data_china2['省-县'] = "全国平均"
+data_china2['type'] = "国"
+
+data_all = data_all.append(data_china2)
+
+data_all2 = data_all.pivot(index="省-县", values="结果", columns="指标").reset_index()
+data_all2_1 = data_all2[data_all2['省-县'] == "全国平均"]
+data_all2_2 = data_all2[data_all2['省-县'] != "全国平均"]
+data_all2 = data_all2_1.append(data_all2_2)
+data_all2['type'] = ""
+data_all2.loc[data_all2['省-县'].str.contains("平均"), 'type'] = "省"
+data_all2.loc[data_all2['省-县'] == "全国平均", 'type'] = "国"
+data_all2.loc[data_all2['type'] == "", 'type'] = "县"
+
+data_all3 = data_all.pivot(index="省-县", values="详情", columns="指标").reset_index()
+data_all3_1 = data_all3[data_all3['省-县'] == "全国平均"]
+data_all3_2 = data_all3[data_all3['省-县'] != "全国平均"]
+data_all3 = data_all3_1.append(data_all3_2)
+
+list_cols = list(data_dic['指标'])
+data_all_cols = ['省-县']
+data_all_cols += list_cols
+
+data_all3 = data_all3[data_all_cols]
+data_all_cols += ['type']
+data_all2 = data_all2[data_all_cols]
+
+data_all4 = data_all[data_all['type'] == "县"].drop(['详情', 'type'], axis=1)
+
+with pd.ExcelWriter("村民问卷_指标计算结果" + date_2 + ".xlsx") as writer:
+    data_all2.to_excel(writer, sheet_name="问卷结果", index=0)
+    data_all3.to_excel(writer, sheet_name="详情", index=0)
+    data_all4.to_excel(writer, sheet_name="样本数", index=0)
+
+prov_index = list(set([i.split("-")[0].replace("平均", "") for i in data_all2['省-县']]))
+
+for prov in tqdm(prov_index):
+    if prov != "全国":
+        df = data_all2[(data_all2['省-县'].str.contains(prov)) | (data_all2['type'] == "国")]
+        df.index = df['省-县']
+        df = df.drop(['省-县'], axis=1).T
+        a = list(df.columns)
+        a.remove("全国平均")
+        a += ["全国平均"]
+        df = df[a]
+        df = df[df['全国平均'] != '国']
+
+        df = df.reindex(list_cols)
+
+        book = load_workbook("村民问卷_指标计算结果" + date_2 + ".xlsx")
+        writer = pd.ExcelWriter("村民问卷_指标计算结果" + date_2 + ".xlsx", engine='openpyxl')
+        writer.book = book
+        df.to_excel(writer, prov)
+        writer.save()
+
+writer.close()
