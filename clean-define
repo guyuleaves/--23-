@@ -1,0 +1,634 @@
+import pandas as pd
+import numpy as np
+import re
+import datetime
+from tqdm import tqdm
+import warnings
+ 
+# -*- coding: utf-8 -*-
+
+import easygui
+import pandas as pd 
+warnings.filterwarnings('ignore')
+
+#判断是否是数字的函数
+def is_number(num):
+    num=str(num)
+    pattern=re.compile(r'(.*)\.(.*)\.(.*)')
+    if pattern.match(num):
+        return False
+    try:
+        float(num)    
+        return num.replace(".","").isdigit()
+    except:
+        return False
+    
+ 
+def isnum(data):
+    try:
+        tf=data.apply(lambda x: is_number(x))
+    except:
+        tf=[True for i in range(len(data))]    
+    return tf
+    
+import scipy.stats as stats
+def cor(a,b):
+    tf=b.isna()==False
+    newa=a[tf]
+    newb=b[tf]
+    r=stats.pearsonr(newa,newb)
+    return r
+
+#%%
+def clear_ganbu(filename,counties):
+    pbar = tqdm(total=100)
+    df=pd.read_excel(filename)
+    #df1=df["1.省市县/区"]
+    for i in range(30):
+        pbar.update(1)
+
+    
+    #筛选出 本省
+    df=df[df["1.省市县/区"].isin(counties)]
+    col=list(df.columns)
+   # print(len(df))
+
+
+#%%去除字符串 并转化数据格式为float
+
+    zrc=[i for i in col if i.find("自然村个数") != -1][0]
+    cymj=[i for i in col if i.find("村域面积") != -1][0]
+    jsyd=[i for i in col if i.find("村庄现状建设用地面积") != -1][0]
+    gdmj=[i for i in col if i.find(".耕地面积") != -1][0]
+    rjgdmj=[i for i in col if i.find("人均耕地面积") != -1][0]
+    dhqg=[i for i in col if i.find("丢荒弃耕的耕地面积") != -1][0]
+    lzgd=[i for i in col if i.find("已流转的耕地面积") != -1][0]
+    zjdmj=[i for i in col if i.find("平均宅基地面积") != -1][0]
+    jtsr=[i for i in col if i.find(".村集体总收入") != -1][0]
+    hjhs=[i for i in col if i.find(".户籍户数") != -1][0]
+    hjrk=[i for i in col if i.find(".户籍人口数") != -1][0]
+    czrk=[i for i in col if i.find(".常住人口数") != -1][0]
+    xhs=[i for i in col if i.find("18岁以下的小孩数") != -1][0]
+    lrs=[i for i in col if i.find("60岁以上的老人数") != -1][0]
+    qzwn=[i for i in col if i.find("全职务农的劳动力人数") != -1][0]
+    ygyn=[i for i in col if i.find("亦工亦农的劳动力人数") != -1][0]
+    xwwg=[i for i in col if i.find("县外务工的劳动力人数") != -1][0]
+    wlrk=[i for i in col if i.find("外来流动人口") != -1][0]
+    fxrk=[i for i in col if i.find("上年度返乡人口") != -1][0]
+    dsxs=[i for i in col if i.find("电商销售产品的农户") != -1][0]
+    nfzs=[i for i in col if i.find(".村内农房总数") != -1][0]
+    wrjz=[i for i in col if i.find(".一年以上无人居住的农房数") != -1][0]
+    dlcf=[i for i in col if i.find("有独立厨房的数量") != -1][0]
+    dlys=[i for i in col if i.find("可洗热水澡的独立浴室的数量") != -1][0]
+    scscs=[i for i in col if i.find("水冲式厕所的数量") != -1][0]
+    xjnf=[i for i in col if i.find(".去年村内新建的农房数") != -1][0]
+    yzbjz=[i for i in col if i.find("使用预制楼板建造的农房栋数") != -1][0]
+    zjdsx=[i for i in col if i.find("履行了宅基地手续") != -1][0]
+    bztj=[i for i in col if i.find("采用标准图集农房数量") != -1][0]
+    fxnf=[i for i in col if i.find("去年村内翻新的农房数") != -1][0]
+    jfcb=[i for i in col if i.find(".去年的建房成本") != -1][0]
+    zlscgs=[i for i in col if i.find("集中供水，水源为自来水厂的自然村个数") != -1][0]
+    fzlscgs=[i for i in col if i.find("集中供水，水源非自来水厂（如井水等）") != -1][0]
+    czws=[i for i in col if i.find("接入城镇污水处理管网的自然村个数") != -1][0]
+    dlws=[i for i in col if i.find("有村级独立污水处理设施的自然村个数") != -1][0]
+    ssyz=[i for i in col if i.find("设施在有效运转的自然村个数") != -1][0]
+    wswcl=[i for i in col if i.find("污水未进行处理的自然村个数") != -1][0]
+    ljfl=[i for i in col if i.find("开展垃圾分类的自然村个数") != -1][0]
+    cmjz=[i for i in col if i.find("村民集资建设村庄") != -1][0]
+    tgtl=[i for i in col if i.find("村民义务投工投劳参与村庄建设") != -1][0]
+    nyss=[i for i in col if i.find("农业设施建设") != -1][0]
+    jcss=[i for i in col if i.find("村庄基础设施建设") != -1][0]
+    rjhj=[i for i in col if i.find("人居环境建设") != -1][0]
+    scrh=[i for i in col if i.find("三产融合相关设施建设") != -1][0]
+    ggfw=[i for i in col if i.find("公共服务设施建设") != -1][0]
+    
+    
+    int_list=[
+        zrc,cymj,jsyd,gdmj,rjgdmj,dhqg,lzgd,zjdmj,jtsr,hjhs,hjrk, czrk,xhs, lrs,
+        qzwn,ygyn,xwwg,wlrk,fxrk,dsxs,nfzs, wrjz,dlcf,dlys,scscs,xjnf,
+        yzbjz,zjdsx,bztj,fxnf,jfcb, zlscgs,fzlscgs,dlws,czws, ssyz,wswcl,
+        ljfl,cmjz,tgtl,nyss,jcss,rjhj,scrh,ggfw]
+    
+    tf=np.array([list(isnum(df[i])) for i in int_list]).T
+    df_mat=np.matrix(df[int_list])
+    df_mat[tf==False]=None
+    df_mat=pd.DataFrame(df_mat)
+    df_mat.columns=int_list
+    df_mat.index=df.index
+    df[int_list]=df_mat
+    df[int_list]=df[int_list].astype(float)
+#%%
+##step 2 去重
+    df1=df.drop_duplicates([jsyd,cymj,gdmj])
+    df1=df1.drop_duplicates([zrc,'3.行政村',cymj])
+    df1=df1.drop_duplicates([zrc,'3.行政村',jsyd])
+    df1=df1.drop_duplicates([zrc,'3.行政村',gdmj])
+    df1=df1[(df1[cymj]!=df1[gdmj]) & (df1[cymj]!=df1[jsyd])]
+   
+
+##step 3 形成true和false
+    #自然村个数
+    col=df1[zrc]
+    t1=(col!=0) & (col< np.nanpercentile(col,97.5))
+    
+    #村域面积
+    "0207有改动"
+    col=df1[cymj]
+    t2=(col!=0) & (col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5))
+    #t2=[False for i in range(len(col))]
+
+    #村庄现状建设用地面积
+    "0207有改动"
+    col=df1[jsyd]
+    t3=(col!=0) & (col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5))
+    #t3=[False for i in range(len(col))]
+    
+    #耕地面积
+    col=df1[gdmj]
+    t4=(col!=0) & (col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5)) #这个需不需要去掉最小的2.5%？
+    
+    #人均耕地面积
+    col=df1[rjgdmj]
+    t5=(col!=0) & (col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    
+    #丢荒弃耕的耕地面积
+    "discuss"
+    "0207有改动-只去大值"
+    col=df1[dhqg]
+    t6=(col<=df1[gdmj])&(col< np.nanpercentile(col,97.5))
+    
+    #已流转的耕地面积
+    "0207有改动-只去大值"
+    "disc"
+    col=df1[lzgd]
+    t7=(col<=df1[gdmj])&(col< np.nanpercentile(col,97.5))
+    
+    #平均宅基地面积
+    col=df1[zjdmj]
+    t8=(col!=0) & (col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5))##不考虑？
+    
+    #村集体总收入
+    col=df1[jtsr]
+    t9=(col< np.nanpercentile(col,97.5))
+    
+    #户籍户数
+    col=df1[hjhs]
+    t10=(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5)) & ((df1[hjrk]+1)/(df1[hjhs]+1)>=2)
+
+    #户籍人口数
+    col=df1[hjrk]
+    t11=(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5)) & ((df1[hjrk]+1)/(df1[hjhs]+1)>=2)
+    
+    #常住人口数
+    col=df1[czrk]
+    t12=(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    
+    #要修改
+    #18岁以下的小孩数
+    col=df1[xhs]
+    " 最大、最小值是不是应该剔除？ - 是，避免大于1的情况 "
+    t13=(col<df1[czrk])&(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    
+    #60岁以上的老人数
+    " 0207-有改动"
+    col=df1[lrs]
+    t14=(col<df1[czrk])&(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    
+    #全职务农的劳动力人数
+    " 0207-有改动"
+    col=df1[qzwn]
+    t15=(col<df1[hjrk])&(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))  # 最大值要剔除，最小值
+    
+    #亦工亦农的劳动力人数
+    " 0207-有改动"
+    col=df1[ygyn]
+    t16=col<df1[hjrk] &(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    
+    #县外务工的劳动力人数
+    " 0207-有改动"
+    col=df1[xwwg]
+    t17=col<df1[hjrk]&(col< np.nanpercentile(col,97.5))&(col> np.nanpercentile(col,2.5))
+    #改到这里
+
+    #外来流动人口
+    col=df1[wlrk]
+    #要再理解一下
+    t18=(df1[wlrk]<df1[czrk]) &((df1[wlrk]+1)/(df1[hjrk]+1)<2)   # 外来人口数要小于户籍人口数的两倍
+    
+    #上年度返乡人口
+    col=df1[fxrk]
+    t19=(df1[fxrk]<df1[czrk]) &((df1[fxrk]+1)/(df1[hjrk]+1)<2)# 返乡人口数要小于户籍人口数的两倍
+    
+    #电商销售产品的农户
+    col=df1[dsxs]
+    t20=col<df1[hjhs]
+
+    #村内农房总数
+    col=df1[nfzs]
+    t21=(col!=0)&(col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5)) &(col>10)& ((df1[hjrk]+1)/(col+1)<20)
+  
+    #一年以上无人居住的农房数
+    col=df1[wrjz]
+    t22=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #有独立厨房的数量
+    col=df1[dlcf]
+    t23=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #可洗热水澡的独立浴室的数量
+    col=df1[dlys]
+    t24=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #水冲式厕所的数量
+    col=df1[scscs]
+    t25=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #去年村内新建的农房数
+    col=df1[xjnf]
+    t26=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #使用预制楼板建造的农房栋数
+    col=df1[yzbjz]
+    t27=(col<=df1[xjnf])&(col< np.nanpercentile(col,97.5))
+    
+    #履行了宅基地手续
+    col=df1[zjdsx]
+    t28=(col<=df1[xjnf])&(col< np.nanpercentile(col,97.5))
+    
+    #采用标准图集农房数量
+    col=df1[bztj]
+    t29=(col<=df1[xjnf])&(col< np.nanpercentile(col,97.5))
+    
+    #去年村内翻新的农房数
+    col=df1[fxnf]
+    t30=(col<df1[nfzs])&(col< np.nanpercentile(col,97.5))
+    
+    #去年的建房成本
+    col=df1[jfcb]
+    t31=(col!=0) & (col< np.nanpercentile(col,97.5))& (col> np.nanpercentile(col,2.5))
+    
+    #集中供水，水源为自来水厂的自然村个数
+    col=df1[zlscgs]
+    t45=col<=df1[zrc]
+    
+    #集中供水，水源非自来水厂（如井水等）
+    col=df1[fzlscgs]
+    t32=col<=df1[zrc]
+    
+        #接入城镇污水处理管网的自然村个数
+    col=df1[czws]
+    t34=col<=df1[zrc]
+    
+    #可能会要修改：22年修改了题目，清洗的规则也改了
+    #有村级独立污水处理设施的自然村个数
+    col=df1[dlws]
+    t33 = col<=df1[zrc]
+    
+
+    
+    #设施在有效运转的自然村个数
+    col=df1[ssyz]
+    t35=(col<=df1[dlws])&(t33)
+    t33=t35
+    
+    #污水未进行处理的自然村个数
+    col=df1[wswcl]
+    t36=col<=df1[zrc]
+    
+    #开展垃圾分类的自然村个数
+    col=df1[ljfl]
+    t37=col<=df1[zrc]
+    
+    #村民集资建设村庄
+    col=df1[cmjz]
+    t38=(col< np.nanpercentile(col,97.5))&(col<df1[czrk])
+
+    #村民义务投工投劳参与村庄建设
+    col=df1[tgtl]
+    t39=(col< np.nanpercentile(col,97.5))&(col<df1[czrk])
+
+    #农业设施建设
+    col=df1[nyss]
+    t40=col< np.nanpercentile(col,97.5)
+
+    #村庄基础设施建设
+    col=df1[jcss]
+    t41=col< np.nanpercentile(col,97.5)
+
+    #人居环境建设
+    col=df1[rjhj]
+    t42=col< np.nanpercentile(col,97.5)
+
+    #三产融合相关设施建设
+    col=df1[scrh]
+    t43=col< np.nanpercentile(col,97.5)
+    
+    #公共服务设施建设
+    col=df1[ggfw]
+    t44=col< np.nanpercentile(col,97.5)
+    
+#%%
+    tfs=[t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20,t21,t22,t23,t24,
+         t25,t26,t27,t28,t29,t30,t31,t45,t32,t33,t34,t35,t36,t37,t38,t39,t40,t41,t42,t43,t44]
+    
+    tfs=np.array([list(t) for t in tfs]).T
+    
+    rowsums=sum(tfs.T)/len(int_list)
+    #如果true比例大于0.7就保留问卷，否则删除整个问卷
+    select=rowsums>0.7
+    
+    
+    df1_mat=np.matrix(df1[int_list])
+    df1_mat[tfs==False]=None
+    df1_mat=pd.DataFrame(df1_mat)
+    df1_mat.columns=int_list
+    df1_mat.index=df1.index
+    df1[int_list]=df1_mat
+    df2=df1[select]
+   # print("剔除掉",1-(len(df2)/len(df1)))
+    
+
+#%%最后一轮筛选，把相关性差的差的筛选掉
+
+    " 异常值导致相关性筛选不过的问题-福哥 "
+
+    base=df2[int_list[2:]].apply(lambda x:x.sum()) 
+    rs=[cor(base,df2[int_list[2:]].iloc[i,:])[0] for i in range(len(df2))]
+    
+    df3=df2[np.array(rs)>0.3]
+    
+     
+    date = datetime.datetime.now()
+    date_2 = str(date.year) + str("%02d"%(date.month)) + str("%02d"%(date.day))
+    for i in range(40):
+        pbar.update(1)
+
+
+    result=df3.to_excel(filename.replace(".xlsx","_清洗结果"+date_2+".xlsx"),index=False)
+    for i in range(30):
+        pbar.update(1)
+        
+    li1="原始问卷数: "+str(len(df))+"\n"+"\n"+"有效问卷数: "+str(len(df3))+"\n"+"\n"+"有效问卷率: "+str("%.2f%%" % (round(len(df3)/len(df),4)* 100))
+    pbar.close()
+    return li1,result
+    
+    
+    
+'''    
+r>0 代表两变量正相关，r<0代表两变量负相关。
+|r|大于等于0.8时，可以认为两变量间高度相关;
+|r|大于等于0.5小于0.8时，可以认为两变量中度相关;
+|r|大于等于0.3小于0.5时，可以认为两变量低度相关。
+|r| 小于0.3说明相关程度弱，基本不相关。
+所以，可以说是不相关
+'''  
+
+def clean_cunmin(infile,counties):
+    pbar = tqdm(total=100)
+    #df=pd.read_excel(path)
+    df=pd.read_excel(infile)
+    #可以考虑一下问卷数量
+
+    #筛选 样本县
+    #counties=["广东省-阳江市-阳西县","广东省-河源市-连平县"]
+
+    for i in range(30):
+        pbar.update(1)
+   
+    df = df[df["0-1.省市区/县"].isin(counties)] # 只选择counties的数据
+    col = list(df.columns) # 列名
+
+    zrks=[i for i in col if i.find(".家庭人口总数") != -1][0] # 存储列名
+    ldls=[i for i in col if i.find(".其中劳动力") != -1][0]
+    xwwg=[i for i in col if i.find("在县外务工的劳动力人数") != -1][0]
+    xhs=[i for i in col if i.find(".小孩") != -1][0]
+    lrs=[i for i in col if i.find(".老人") != -1][0]
+    nl=[i for i in col if i.find("您的年龄是") != -1][0]
+    xwwgsr=[i for i in col if i.find("县外务工人员的收入占家庭收入的比重") != -1][0]
+    nyscsr=[i for i in col if i.find(".其中，农业生产收入") != -1][0]
+    zygd=[i for i in col if i.find("您家中自有耕地") != -1][0]
+    sjgz=[i for i in col if i.find("实际耕种土地") != -1][0]
+    qglh=[i for i in col if i.find("弃耕/撂荒") != -1][0]
+    zzgd=[i for i in col if i.find("转租给他人") != -1][0]
+    cbgd=[i for i in col if i.find("承包他人耕地") != -1][0]
+    zjf=[i for i in col if i.find("村里有多少栋自建房") != -1][0]
+    wrjz=[i for i in col if i.find("无人居住的有多少栋") != -1][0]
+    zjfcs=[i for i in col if i.find("住的自建房层数") != -1][0]
+    jzmj=[i for i in col if i.find("一层建筑（基底）面积") != -1][0]
+    xtdf=[i for i in col if i.find("夏天平均一个月电费") != -1][0]
+    dtdf=[i for i in col if i.find("冬天平均一个月电费") != -1][0]
+    dj=[i for i in col if i.find(".电价") != -1][0]
+
+
+
+    # %%提取出所有要处理的字段
+    Clist = [zrks, ldls, xwwg, xhs, lrs, nl, xwwgsr, nyscsr,
+             zygd, sjgz, qglh, zzgd, cbgd, zjf, wrjz, zjfcs, jzmj,
+             xtdf, dtdf, dj]
+
+    #Clist = [zrks, ldls, xwwg, xhs, lrs, nl]
+    
+    
+    
+    tf = np.array([list(isnum(df[i])) for i in Clist]).T # 判断每一个数据是否是数字形式,为什么要转置行列呢？
+    df_mat = np.matrix(df[Clist]) # 把df转成np.matrix，方便后面计算
+    df_mat[tf == False] = None # 如果有数据不是数字形式，则赋值为none
+    df_mat = pd.DataFrame(df_mat)
+    df_mat.columns = Clist
+    df_mat.index = df.index
+    df[Clist] = df_mat # 将原始df里的数据换成df_mat经过判别数字类型后的数值
+    df[Clist] = df[Clist].astype(float)
+    
+    #需要去重吗？
+    df1=df.drop_duplicates(df.columns[2:])
+    
+    #%%
+    #家庭总人口数
+    col=df1[zrks]
+    t1=(col<20)&(col!=0)#家庭人数小于20
+    #劳动力人数
+    col=df1[ldls]
+    t2=col<=df1[zrks]# 劳动力小于人口总数
+    #县外务工人数
+    col=df1[xwwg]
+    t3=col<=df1[ldls] # 县外务工人数小于劳动人口总数
+    #小孩（仍在读书或16岁以下） (人)
+    col=df1[xhs]
+    t4=(col+df1[ldls])<=df1[zrks] # 小孩数+劳动力数量 <= 总人口数
+    #老人（60岁以上） (人)
+    col=df1[lrs]
+    t5=(col+df1[ldls])<=df1[zrks]# 老人数+劳动力数量 <= 总人口数
+    #您的年龄是 (岁)
+    col=df1[nl]
+    t6=(col<86)&(col>17)# 采访村民的年纪应该在17-86岁之间
+    #县外务工人员的收入占家庭收入的比重
+    col=df1[xwwgsr]
+    t7=(col+df1[nyscsr])<=100
+    #农业生产收入（承包给别人不算）占家庭收入的比重是
+    col=df1[nyscsr]
+    t8=(col+df1[xwwgsr])<=100
+
+
+    #您家中自有耕地
+    col=df1[zygd]
+    t9=col< np.nanpercentile(col,97.5)# 升序排列下，保留属于前97.5%的数据，即剔除异常大的数值
+    #实际耕种土地
+    col=df1[sjgz]
+    t10=(col+df1[qglh])<=df1[zygd]
+    # 弃耕/撂荒（不包括轮种）耕地
+    "0207有改动"
+    col = df1[qglh]
+    t11 = ((col + df1[sjgz]) <= df1[zygd]) & (col < np.nanpercentile(col, 97.5)) # 实际耕种土地+弃耕/撂荒土地 <= 家中自有耕地总数
+    # 转租给他人
+    "0207有改动"
+    col = df1[zzgd]
+    t12 = (col <= df1[zygd]) & (col < np.nanpercentile(col, 97.5)) # 转租耕地 <= 家中自有耕地总数
+    # 您家中承包他人耕地
+    col = df1[cbgd]
+    t13 = (col < np.nanpercentile(col, 97.5)) # 剔除异常大的值
+    
+    #您家中在村里有多少栋自建房
+    col=df1[zjf]
+    t14=(col<11)#10栋
+    #%%其中无人居住的有多少栋
+    col=df1[wrjz]
+    t15=(col<=df1[zjf])#无人居住小于农房数量
+    #您现在住的自建房层数是
+    col=df1[zjfcs]
+    t16=(col<11)#10层
+    #一层建筑（基底）面积约
+    col=df1[jzmj]
+    t17=(col>=20)&(col<=500)
+    
+    #%%您家夏天平均一个月电费
+    col=df1[xtdf]
+    t18=(col>=0)&(col<=500)#电费0-500
+    #冬天平均一个月电费
+    col=df1[dtdf]
+    t19=(col>=0)&(col<=500)#电费0-500
+    #电价
+    col=df1[dj]
+    t20=(col>=0)&(col<=2)#电费0-2
+    
+    tfs=[t1,t2,t3,t4,t5,t6,t7,t8,t9,t10,t11,t12,t13,t14,t15,t16,t17,t18,t19,t20]
+    
+    #%%剔除空值大于30%的问卷
+    tfs=np.array([list(t) for t in tfs]).T
+    
+    rowsums=sum(tfs.T)/len(Clist)
+    select=rowsums>0.7
+    
+    df1_mat=np.matrix(df1[Clist])
+    df1_mat[tfs==False]=None
+    df1_mat=pd.DataFrame(df1_mat)
+    df1_mat.columns=Clist
+    df1_mat.index=df1.index
+    df1[Clist]=df1_mat
+    df2=df1[select]
+
+    #%%最后一轮筛选，把相关性差的差的筛选掉
+    base=df2[Clist[2:]].apply(lambda x:x.sum()) 
+    rs=[cor(base,df2[Clist[2:]].iloc[i,:])[0] for i in range(len(df2))]
+    
+   # sum(np.array(rs)<0.5)
+    
+    df3=df2[np.array(rs)>0.3]
+    for i in range(40):
+        pbar.update(1)
+   # sum(np.array(rs)<0.5)
+    
+    
+    
+    date = datetime.datetime.now()
+    date_2 = str(date.year) + str("%02d"%(date.month)) + str("%02d"%(date.day))
+        
+    result=df3.to_excel(infile.replace(".xlsx","_清洗结果"+date_2+".xlsx"),index=False)
+    #print(prov,'finish')
+    for i in range(30):
+        pbar.update(1)
+    #result=df3.to_excel(filename.replace(".xlsx","_清晰结果"+t+".xlsx"))
+    
+    li1="原始问卷数: "+str(len(df))+"\n"+"\n"+"有效问卷数: "+str(len(df3))+"\n"+"\n"+"有效问卷率: "+str("%.2f%%" % (round(len(df3)/len(df),4)* 100))
+    
+    return li1,result
+    
+if __name__=='__main__':
+
+    prov_county={'河北省': ['河北省-石家庄市-平山县', '河北省-唐山市-乐亭县', '河北省-邯郸市-涉县', '河北省-邢台市-柏乡县', '河北省-张家口市-阳原县'], 
+'山西省': ['山西省-大同市-灵丘县', '山西省-忻州市-神池县', '山西省-忻州市-岢岚县', '山西省-临汾市-曲沃县'], '内蒙古自治区': ['内蒙古自治区-通辽市-开鲁县', '内蒙古自治区-呼伦贝尔市-阿荣旗'], '辽宁省': ['辽宁省-大连市-长海县', '辽宁省-本溪市-本溪满族自治县', '辽宁省-阜新市-彰武县', '辽宁省-铁岭市-西丰县'], '吉林省': ['吉林省-四平市-梨树县', '吉林省-通化市-辉南县', '吉林省-松原市-前郭尔罗斯蒙古族自治县', '吉林省-白城市-通榆县'], 
+'黑龙江省': ['黑龙江省-齐齐哈尔市-依安县', '黑龙江省-大庆市-林甸县', '黑龙江省-佳木斯市-汤原县', '黑龙江省-绥化市-庆安县'], 
+'江苏省': ['江苏省-徐州市-沛县', '江苏省-南通市-如东县', '江苏省-连云港市-东海县', '江苏省-盐城市-建湖县', '江苏省-泰州市-兴化市'], 
+'浙江省': ['浙江省-杭州市-淳安县', '浙江省-宁波市-象山县', '浙江省-温州市-泰顺县', '浙江省-嘉兴市-嘉善县', '浙江省-湖州市-长兴县', '浙江省-湖州市-安吉县', '浙江省-绍兴市-新昌县', '浙江省-金华市-浦江县', '浙江省-衢州市-开化县', '浙江省-衢州市-龙游县', '浙江省-舟山市-嵊泗县', '浙江省-台州市-天台县', '浙江省-丽水市-遂昌县'], 
+'安徽省': ['安徽省-合肥市-肥东县', '安徽省-合肥市-庐江县', '安徽省-黄山市-黟县', '安徽省-滁州市-来安县', '安徽省-六安市-霍邱县'], '福建省': ['福建省-福州市-永泰县', '福建省-莆田市-仙游县', '福建省-三明市-建宁县', '福建省-泉州市-永春县'], 
+'江西省': ['江西省-景德镇市-浮梁县', '江西省-赣州市-寻乌县', '江西省-吉安市-泰和县', '江西省-宜春市-靖安县'], '山东省': ['山东省-东营市-广饶县', '山东省-济宁市-汶上县', '山东省-泰安市-东平县', '山东省-临沂市-沂水县', '山东省-聊城市-阳谷县'], 
+'河南省': ['河南省-洛阳市-嵩县', '河南省-平顶山市-叶县', '河南省-平顶山市-郏县', '河南省-新乡市-封丘县', '河南省-信阳市-罗山县'], 
+'湖北省': ['湖北省-黄石市-阳新县', '湖北省-十堰市-竹山县', '湖北省-宜昌市-远安县', '湖北省-襄阳市-南漳县', '湖北省-荆门市-沙洋县', '湖北省-孝感市-孝昌县', '湖北省-荆州市-江陵县', '湖北省-黄冈市-罗田县', '湖北省-咸宁市-嘉鱼县', '湖北省-随州市-随县', '湖北省-恩施土家族苗族自治州-宣恩县', '湖北省-省直辖县级行政区划-潜江市'], 
+'湖南省': ['湖南省-常德市-安乡县', '湖南省-郴州市-汝城县', '湖南省-永州市-宁远县', '湖南省-湘西土家族苗族自治州-凤凰县'], 
+'广东省': ['广东省-韶关市-翁源县', '广东省-肇庆市-怀集县', '广东省-河源市-连平县', '广东省-阳江市-阳西县'], 
+'广西壮族自治区': ['广西壮族自治区-桂林市-恭城瑶族自治县', '广西壮族自治区-钦州市-浦北县', '广西壮族自治区-玉林市-兴业县', '广西壮族自治区-百色市-凌云县'], '海南省': ['海南省-省直辖县级行政区划-澄迈县', '海南省-省直辖县级行政区划-琼中黎族苗族自治县'], '重庆市': ['重庆市-县-奉节县', '重庆市-县-石柱土家族自治县'], 
+'四川省': ['四川省-自贡市-荣县', '四川省-攀枝花市-米易县', '四川省-南充市-仪陇县', '四川省-雅安市-汉源县'], '贵州省': ['贵州省-贵阳市-开阳县', '贵州省-遵义市-桐梓县', '贵州省-安顺市-关岭布依族苗族自治县', '贵州省-黔东南苗族侗族自治州-榕江县'], 
+'云南省': ['云南省-昆明市-嵩明县', '云南省-曲靖市-罗平县', '云南省-红河哈尼族彝族自治州-建水县', '云南省-大理白族自治州-云龙县'], '陕西省': ['陕西省-渭南市-合阳县', '陕西省-榆林市-清涧县', '陕西省-榆林市-子洲县', '陕西省-安康市-平利县'], 
+'甘肃省': ['甘肃省-张掖市-高台县', '甘肃省-平凉市-庄浪县', '甘肃省-陇南市-康县', '甘肃省-甘南藏族自治州-卓尼县'], '青海省': ['青海省-西宁市-大通回族土族自治县', '青海省-海东市-循化撒拉族自治县', '青海省-海北藏族自治州-刚察县', '青海省-黄南藏族自治州-尖扎县'], 
+'宁夏回族自治区': ['宁夏回族自治区-石嘴山市-平罗县', '宁夏回族自治区-吴忠市-盐池县', '宁夏回族自治区-吴忠市-同心县', '宁夏回族自治区-固原市-隆德县', '宁夏回族自治区-固原市-彭阳县'], '新疆维吾尔自治区': ['新疆维吾尔自治区-昌吉回族自治州-吉木萨尔县', '新疆维吾尔自治区-巴音郭楞蒙古自治州-若羌县','新疆维吾尔自治区-喀什地区-伽师县'], 
+'新疆生产建设兵团': ['新疆生产建设兵团-第一师阿拉尔市-十一团', '新疆生产建设兵团-第六师五家渠市-共青团农场']}
+
+
+    leixing=easygui.buttonbox(msg="                                      您好！                     "+"\n"+"\n"+
+                "                      欢迎使用乡村建设评价问卷数据清洗程序!"+"\n"+"\n"+
+                "              请注意，文件命名需要带有本省省名，如 “村干部问卷-广东”，"+"\n"+"\n"+
+                "                           请点击选择您需要清洗的问卷：",title="乡村建设评价",choices=("村干部问卷","村民问卷"))
+                
+                
+    if leixing=="村民问卷":
+        infile = easygui.fileopenbox()
+        #infile=r"C:\Users\Administrator\Desktop\2022湖北乡村建设评价\原始问卷\湖北省村民问卷（截至1031）.xlsx"
+        for pro in prov_county.keys():
+            if infile.find(pro)!=-1:
+                prov=pro
+  
+    
+        if prov=='湖北省':
+            df=pd.read_excel(infile)
+            xian=df['0-1.省市区/县'].drop_duplicates().values
+            prov_county['湖北省']=xian
+        counties=prov_county[prov]
+        
+        
+        rate,result=clean_cunmin(infile=infile,counties=counties)
+        title = easygui.msgbox(msg="你已成功清洗完数据。"+"\n"+"\n"+
+                    rate+"\n"+"\n"+
+                    
+                        "数据结果与原文件在同一个文件夹。",title="恭喜您！",ok_button="谢谢您！")     
+
+    if leixing=="村干部问卷":
+        path = easygui.fileopenbox()
+        #path=input()
+        #path="C:/Users/lixun/Desktop/清洗程序/20210827村干部问卷-广东.xlsx"
+        #path=r"J:\cyf\2022\2022全国乡村建设评价\问卷清洗代码\村干部问卷\湖北省村干部问卷 (2022-8-11).xlsx"
+        provfile=path.split("\\")[-1]
+        for pro in prov_county.keys():
+            if provfile.find(pro)!=-1:
+                prov=pro
+    
+        if prov=='湖北省':
+            df=pd.read_excel(path)
+            xian=df['1.省市县/区'].drop_duplicates().values
+            prov_county['湖北省']=xian
+        counties=prov_county[prov]
+        rate,result=clear_ganbu(filename=path,counties=counties)
+    
+    
+        title = easygui.msgbox(msg="你已成功清洗完数据。"+"\n"+"\n"+
+                     rate+"\n"+"\n"+
+                                          
+                         "数据结果与原文件在同一个文件夹。",title="恭喜您！",ok_button="谢谢您！")
+
+                        
+                
+    
+    
+    
+    
+    
+    
+    
